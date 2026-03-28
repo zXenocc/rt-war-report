@@ -27,7 +27,7 @@ Overview (Information Overload) และข่าวปลอมแพร่ก
 • Travelers: นักเดินทางที่ต้องการตรวจสอบความปลอดภัยของจุดหมายปลายทาง
 Installation & Setup (For Developers)
 Clone Repository: 
-git clone https://github.com"ชื่อโปรเจ็ค"/comrt-war-report.git
+git clone https://github.com/"ชื่อโปรเจ็ค"
 Prerequisites:
 ติดตั้ง n8n (Self-hosted หรือ Cloud)
 สมัคร API Key สำหรับ Event Registry (NewsAPI.ai)
