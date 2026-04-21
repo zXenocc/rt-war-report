@@ -36,7 +36,7 @@ Prerequisites:
 Import Workflow
 นำไฟล์ workflow.json เข้าไปใน n8n
 ตั้งค่า Environment Variables สำหรับ API Keys ต่างๆ
-
+```mermaid
 graph TD
     %% Start Node
     Start([Start]) --> TriggerSystem[Trigger System]
@@ -76,3 +76,4 @@ graph TD
     style Decision fill:#fff4dd,stroke:#d4a017,stroke-width:2px
     style AIAgent fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     style CodeNode fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
