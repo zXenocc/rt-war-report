@@ -26,10 +26,8 @@ Overview (Information Overload) และข่าวปลอมแพร่ก
 • News Enthusiasts: ผู้ที่ต้องการติดตามสถานการณ์โลกอย่างใกล้ชิดและถูกต้อง
 • Travelers: นักเดินทางที่ต้องการตรวจสอบความปลอดภัยของจุดหมายปลายทาง
 Installation & Setup (For Developers)
-Clone Repository: 
-git clone https://github.com/"ชื่อโปรเจ็ค"
-Prerequisites:
-ติดตั้ง n8n (Self-hosted หรือ Cloud)
+Clone Repository: git clone https://github.com/"ชื่อโปรเจ็ค"
+Prerequisites:ติดตั้ง n8n (Self-hosted หรือ Cloud)
 สมัคร API Key สำหรับ Event Registry (NewsAPI.ai)
 สร้างบัญชี LINE Developers และตั้งค่า Messaging API
 เตรียม API Key สำหรับ AI Model (Google AI Studio หรือ OpenAI)
