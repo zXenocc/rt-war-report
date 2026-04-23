@@ -1,0 +1,360 @@
+{
+  "name": "403_fixed_v2",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://acleddata.com/api-documentation/getting-started",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        96
+      ],
+      "id": "983cfedc-b919-4513-a6b8-8cdc7232be10",
+      "name": "Get News Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. ดึงข้อมูล Static Data สำหรับเช็คข่าวซ้ำ\nconst staticData = $getWorkflowStaticData('global');\nconst currentOutput = $input.first().json.output ?? '';\nconst previousOutput = staticData.lastSentOutput ?? '';\n\n// 2. ตรวจสอบที่มาของ Execution แบบปลอดภัย\nlet webhookData = null;\ntry {\n  // ใช้ดัชนี [0] และเช็คความผิดพลาดเพื่อไม่ให้ Node พัง\n  webhookData = $('Webhook1').first();\n} catch (e) {\n  // ถ้าไม่มีข้อมูลจาก Webhook (เช่น รันจาก Schedule) จะมาตกที่นี่\n  webhookData = null;\n}\n\nconst isWebhook = webhookData !== null;\nconst isNew = currentOutput.trim() !== previousOutput.trim();\n\n// 3. กำหนด Logic การตัดสินใจ\nlet shouldProceed = false;\nlet replyToken = null;\n\nif (isWebhook) {\n  // ถ้ามาจาก Webhook ให้ผ่านตลอด และดึง replyToken\n  shouldProceed = true;\n  replyToken = webhookData.json.body.events[0].replyToken;\n} else if (isNew) {\n  // ถ้ามาจาก Schedule ให้ผ่านเฉพาะข่าวใหม่ และอัปเดต static data\n  shouldProceed = true;\n  staticData.lastSentOutput = currentOutput;\n}\n\n// 4. ส่งข้อมูลออกไปยัง Node ถัดไป\nreturn [{\n  json: {\n    output: currentOutput,\n    isNew: shouldProceed,\n    replyToken: replyToken\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        96
+      ],
+      "id": "1dcd8497-759b-4d0e-9eee-f4c8a28f1833",
+      "name": "Logic Filter"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.replyToken ? 'https://api.line.me/v2/bot/message/reply' : 'https://api.line.me/v2/bot/message/broadcast' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer XKz5rfzK91ERLxL9yVJ7uEmNeJekHKO80pXdqhCBpHTho/+f0D+QiCnhG9fWVy6TPO7REeY7LiV3xIL/2227rIbvbMTTxUiINPcSulb0m6jw5O+GhTcrTeLOKwoBujFuQxFJCBeljgL6P/4i3cNv4gdB04t89/1O/w1cDnyilFU="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": {{ JSON.stringify($json.output) }}\n    }\n  ]\n  {{ $json.replyToken ? ',\"replyToken\": ' + JSON.stringify($json.replyToken) : \"\" }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1168,
+        96
+      ],
+      "id": "f48ad09f-0da9-42e4-9ab0-debab3df70ff",
+      "name": "LINE Send"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "News-bot",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        -16
+      ],
+      "id": "b1f80edc-4bd7-4669-bc5c-e480313487fa",
+      "name": "Webhook1",
+      "webhookId": "23123210-08f7-4b19-a899-c78363a95ad0"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6dda1462-869c-4b9b-bb2a-782fbad12dbb",
+              "leftValue": "={{ $json.body.events[0].message.text }}",
+              "rightValue": "ข่าว",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "bdcd43b0-8762-4c8d-92ec-00afac30c4c8",
+              "leftValue": "={{ $json.body.events[0].message.text }}",
+              "rightValue": "ข่าวล่าสุด",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ae9e2586-c1af-4c48-983e-84a23475e65d",
+              "leftValue": "={{ $json.body.events[0].message.text }}",
+              "rightValue": "News",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        48,
+        -16
+      ],
+      "id": "fff0b3ab-1ddc-418f-ac5e-9127f032ded3",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        192
+      ],
+      "id": "9e674101-6305-4568-886d-66e84577b047",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "ช่วยสรุปข่าวจากข้อมูล JSON ด้านล่างนี้ให้ละเอียดและยาวเป็นพิเศษ โดยเน้นประเด็นสงครามและความขัดแย้งที่มีผลกระทบระดับโลกในปี 2569:\nโครงสร้างการนำเสนอ:\nสรุปสถานการณ์ล่าสุด (Breaking Analysis): สรุปสิ่งที่เกิดขึ้นทันที\nหมวดหมู่เนื้อหา: แบ่งตาม (1) การทหารและสงคราม (2) การเมืองระหว่างประเทศ (3) ผลกระทบต่อเศรษฐกิจและอุตสาหกรรม\nการวิเคราะห์เชิงลึก (Strategic Insight): วิเคราะห์ว่าเหตุการณ์นี้จะส่งผลกระทบอย่างไรในอีก 1-3 เดือนข้างหน้า\nบุคคล/องค์กรที่ต้องจับตา: รายชื่อตัวละครสำคัญในข่าวนี้ (ไม่เกิน1000 ตัววอักษร)",
+        "options": {
+          "systemMessage": "คุณคือบรรณาธิการข่าวอาวุโสและนักวิเคราะห์ภูมิรัฐศาสตร์ (Geopolitics) ที่มีความเชี่ยวชาญสูงสุด หน้าที่ของคุณคือรับข้อมูล JSON ข่าวสารเกี่ยวกับสงครามและการเมืองโลกปี 2569 แล้วนำมาวิเคราะห์เชื่อมโยงสถานการณ์ ไม่ใช่แค่การสรุปสั้นๆ โดยต้องระบุถึงผลกระทบต่อความมั่นคงและเศรษฐกิจโลกอย่างเป็นรูปธรรม ให้ตอบเป็นรูปแบบ Markdown ที่อ่านง่าย หัวข้อชัดเจน และใช้ภาษาระดับมืออาชีพ\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        496,
+        96
+      ],
+      "id": "adc63840-2663-4bb7-a2a9-f85385fac45b",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        496,
+        272
+      ],
+      "id": "3d0ce64f-f3ba-4229-be7e-89816ca47bd4",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "NUv8eUwuOb5Pkn7I",
+          "name": "Bell's"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "11111111-aaaa-bbbb-cccc-dddddddddddd",
+              "leftValue": "={{ $json.isNew }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        960,
+        96
+      ],
+      "id": "e1ba8125-82b2-4eb0-a923-93b3d6d38fc8",
+      "name": "Is New Message?1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "news-bot-memory",
+        "contextWindowLength": 1
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        384
+      ],
+      "id": "1df6c953-20da-4252-8d1c-29ac572b12a9",
+      "name": "Window Buffer Memory1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get News Data": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logic Filter": {
+      "main": [
+        [
+          {
+            "node": "Is New Message?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Get News Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get News Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Logic Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Message?1": {
+      "main": [
+        [
+          {
+            "node": "LINE Send",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LINE Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "78f2206c-a569-4608-8b88-10d56f865627",
+  "meta": {
+    "instanceId": "c6ea936472e83d981fde2e1f0a8b6d61fe0dc6b54f3a7d1b0fae6f08b4334cee"
+  },
+  "id": "K2yviGCaLfitIWu1",
+  "tags": []
+}
