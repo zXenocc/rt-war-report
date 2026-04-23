@@ -13,7 +13,12 @@ Reply Mode: ตอบกลับเฉพาะบุคคลด้วย repl
 Broadcast Mode: ประกาศข่าวใหม่ให้ผู้ใช้ทุกคนทราบเมื่อตรวจพบเหตุการณ์สำคัญจากระบบ Schedule.
 Advanced Deduplication: ใช้ Code Node (JavaScript) เพื่อเปรียบเทียบข้อมูลใหม่กับ staticData ป้องกันการแจ้งเตือนข่าวเดิมซ้ำซ้อน.
 
-การติดตั้ง @ไลน์ ID@993ecinh
+การติดตั้ง (Installation)
+Import Workflow: นำไฟล์.json เข้าสู่ n8n.
+API Credentials: ตั้งค่าการเชื่อมต่อสำหรับ:OpenRouter API: สำหรับโมเดล GPT-4o-mini.
+LINE Messaging API: ใส่ Channel Access Token ในส่วน Header ของ Node LINE Send.
+หลังจากรันwebhook URL ให้เอา api ไปใส่
+ACLED API: สำหรับดึงข้อมูลข่าวสารสงคราม.
 
 รายละเอียดทางเทคนิค (Technical Details)
 AI Prompting: ระบบสั่งการให้ AI วิเคราะห์เชื่อมโยงผลกระทบต่อเศรษฐกิจและความมั่นคงโลก โดยจำกัดเนื้อหาไม่เกิน 1,000 ตัวอักษรเพื่อความกระชับ.
