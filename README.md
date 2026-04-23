@@ -13,3 +13,8 @@ Reply Mode: ตอบกลับเฉพาะบุคคลด้วย repl
 Broadcast Mode: ประกาศข่าวใหม่ให้ผู้ใช้ทุกคนทราบเมื่อตรวจพบเหตุการณ์สำคัญจากระบบ Schedule.
 Advanced Deduplication: ใช้ Code Node (JavaScript) เพื่อเปรียบเทียบข้อมูลใหม่กับ staticData ป้องกันการแจ้งเตือนข่าวเดิมซ้ำซ้อน.
 
+การติดตั้ง @ไลน์ ID@993ecinh
+
+รายละเอียดทางเทคนิค (Technical Details)
+AI Prompting: ระบบสั่งการให้ AI วิเคราะห์เชื่อมโยงผลกระทบต่อเศรษฐกิจและความมั่นคงโลก โดยจำกัดเนื้อหาไม่เกิน 1,000 ตัวอักษรเพื่อความกระชับ.
+Deduplication Script: มีการใช้ JavaScript เพื่อจัดการ lastSentOutput ผ่าน getWorkflowStaticData เพื่อให้ระบบจดจำสถานะการส่งข่าวล่าสุดได้แม้ workflow จะจบการทำงานไปแล้ว.
